@@ -12,9 +12,11 @@
   "author": "Google LLC",
   "license": "Apache-2.0",
   "dependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
     "bcrypt": "^6.0.0",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
     "mongodb": "^7.0.0",
     "mongoose": "^9.0.0",
     "swagger-jsdoc": "^6.2.8",

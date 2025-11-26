@@ -5,7 +5,7 @@ import routineRouter from './routine';
 const apiRouter = Router();
 
 apiRouter.use('/users', userRouter);
-apiRouter.use('routines', routineRouter);
+apiRouter.use('/routines', routineRouter);
 
 
 console.log('API funcionando')

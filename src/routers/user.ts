@@ -76,6 +76,54 @@ userRouter.get('/', async (req: Request, res: Response, next: NextFunction) => {
       next(error);
     }
   });
+
+  /**
+ * @swagger
+ * /api/users/login:
+ *   post:
+ *     summary: Inicia sesión para obtener un token de autenticación
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: "test@example.com"
+ *               password:
+ *                 type: string
+ *                 example: "password123"
+ *     responses:
+ *       200:
+ *         description: Login exitoso, retorna el token y datos del usuario.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                   description: Token JWT para usar en cabeceras de autorización.
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Credenciales inválidas.
+ */
+userRouter.post('/login', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+      const { token, user } = await userService.loginUser(req.body);
+      res.json({ token, user });
+  } catch (error) {
+      next(error);
+  }
+});
+
   
   export default userRouter;
 

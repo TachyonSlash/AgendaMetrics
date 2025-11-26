@@ -16,7 +16,8 @@ export interface IRoutine extends Document {
     estimatedDuration: number, // Duración en minutos
     suggestedTime?: string, // HH:MM
     notifications: boolean,
-    created: Date;
+    createdAt: Date,
+    updatedAt: Date;
 }
 
 // Esquema de mongoose
@@ -64,17 +65,13 @@ const routineSchema = new Schema<IRoutine>({
     },
     suggestedTime: {
         type: String, // Formato "HH:MM"
-        required: false, // Es opcional
+        required: false,
         match: [/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "El formato de hora debe ser HH:MM (ej. 09:30 o 14:00)"]
     },
     notifications: {
         type: Boolean,
         default: true // Las notificaciones estarán activadas por defecto
     },
-    created: {
-        type: Date,
-        default: Date.now
-    }
 }, {
     timestamps: true, // Añade createdAt y updatedAt automáticamente
     toJSON: {

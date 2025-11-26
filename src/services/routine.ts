@@ -2,7 +2,7 @@ import Routine, { IRoutine } from '../models/routine';
 import { Types } from 'mongoose';
 
 // Interfaz para el DTO de creación de rutina
-interface CreateRoutineDTO extends Omit<IRoutine, 'id' | 'createdAt' | 'updatedAt' | 'user' | 'created'> { }
+interface CreateRoutineDTO extends Omit<IRoutine, 'id' | 'createdAt' | 'updatedAt' | 'user'> { }
 
 // Interfaz para el DTO de actualización. Todos los campos son opcionales.
 interface UpdateRoutineDTO extends Partial<CreateRoutineDTO> { }
@@ -33,20 +33,18 @@ const createRoutine = async (routineData: CreateRoutineDTO, userId: string | Typ
 };
 
 const updateRoutine = async (id: string, updateData: UpdateRoutineDTO, userId: string | Types.ObjectId) => {
-    const updatedRoutine = await Routine.findOneAndUpdate(
-        { _id: id, user: userId }, // Solo actualice si el Id y el usuario coincide
-        updateData,
-        { new: true, runValidators: true }
-    );
+    const routine = await Routine.findOne({ _id: id, user: userId });
 
-    if(!updatedRoutine) {
+    if (!routine) {
         const error = new Error('La rutina no existe o no pertenece al usuario');
         (error as any).statusCode = 404;
         throw error;
     }
+    routine.set(updateData);
+
+    const updatedRoutine = await routine.save();
 
     return updatedRoutine;
-
 };
 
 const deleteRoutine = async (id: string, userId: string | Types.ObjectId) => {

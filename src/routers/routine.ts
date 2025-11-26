@@ -1,21 +1,26 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { routineService } from '../services/routine';
 import { Types } from 'mongoose';
+import authMiddleware from '../middlewares/auth';
 
-
-// Se extiende la interfaz Request de Express para incluir los datos del usuario
-// que se añadirían en un middleware de autenticación.
 interface AuthenticatedRequest extends Request {
     user?: {
         id: string | Types.ObjectId;
     };
-
 }
 
 const routineRouter = Router();
 
+routineRouter.use(authMiddleware);
 
-// Get de todas las rutinas de un usuario
+
+/**
+ * @swagger
+ * tags:
+ *   name: Routines
+ *   description: API para la gestión de rutinas de usuario
+ */
+
 /**
  * @swagger
  * /api/routines:
@@ -39,17 +44,15 @@ const routineRouter = Router();
 routineRouter.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         if (!req.user) {
-            return res.status(401).json({ message: 'Autenticación requerida.' })
+            return res.status(401).json({ message: 'Autenticación requerida.' });
         }
         const routines = await routineService.getAllUserRoutines(req.user.id);
-        res.json(routines)
-
-    } catch(error) {
+        res.json(routines);
+    } catch (error) {
         next(error);
     }
 });
 
-// Get de todas las rutinas
 /**
  * @swagger
  * /api/routines/all:
@@ -74,13 +77,11 @@ routineRouter.get('/all', async (req: Request, res: Response, next: NextFunction
     try {
         const allRoutines = await routineService.getAllRoutines();
         res.json(allRoutines);
-    } catch(error) {
+    } catch (error) {
         next(error);
     }
-
 });
 
-// Get de una rutina especifica de un usuario
 /**
  * @swagger
  * /api/routines/{id}:
@@ -110,22 +111,18 @@ routineRouter.get('/all', async (req: Request, res: Response, next: NextFunction
  */
 routineRouter.get('/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-        // Si el ID no coincide con el usuario
-        if(!req.user) {
-            return res.status(401).json({ message: 'Autenticación requerida.' })
+        if (!req.user) {
+            return res.status(401).json({ message: 'Autenticación requerida.' });
         }
         const { id } = req.params;
-        const routine = await routineService.getRoutineById(id, req.user.id)
-        // Si no encuentra la rutina
-        if(!routine){
-            return res.status(404).json({ message: 'Rutina no encontrada.' })
+        const routine = await routineService.getRoutineById(id, req.user.id);
+        if (!routine) {
+            return res.status(404).json({ message: 'Rutina no encontrada o no tienes permiso para verla.' });
         }
-        res.json(routine)
-
-    } catch(error){
-        next(error)
+        res.json(routine);
+    } catch (error) {
+        next(error);
     }
-
 });
 
 /**
@@ -141,7 +138,46 @@ routineRouter.get('/:id', async (req: AuthenticatedRequest, res: Response, next:
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/RoutineInput'
+ *             type: object
+ *             required:
+ *               - name
+ *               - category
+ *               - frequency
+ *               - estimatedDuration
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Leer un libro"
+ *               category:
+ *                 type: string
+ *                 enum: [trabajo, estudio, sueño, ejercicio, otro]
+ *                 example: "estudio"
+ *               frequency:
+ *                 type: object
+ *                 required:
+ *                   - type
+ *                 properties:
+ *                   type:
+ *                     type: string
+ *                     enum: [diaria, semanal, mensual, dias_especificos]
+ *                     example: "dias_especificos"
+ *                   days:
+ *                     type: array
+ *                     items:
+ *                       type: number
+ *                     description: "Requerido si el tipo es 'dias_especificos' (0=Dom, 1=Lun...)"
+ *                     example: [1, 3, 5]
+ *               estimatedDuration:
+ *                 type: number
+ *                 description: "Duración estimada en minutos."
+ *                 example: 30
+ *               suggestedTime:
+ *                 type: string
+ *                 description: "Hora sugerida (HH:MM)."
+ *                 example: "21:30"
+ *               notifications:
+ *                 type: boolean
+ *                 example: true
  *     responses:
  *       201:
  *         description: Rutina creada exitosamente.
@@ -156,13 +192,13 @@ routineRouter.get('/:id', async (req: AuthenticatedRequest, res: Response, next:
  */
 routineRouter.post('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-        if(!req.user) {
-            return res.status(401).json({ message: 'Autenticación requerida.' })
+        if (!req.user) {
+            return res.status(401).json({ message: 'Autenticación requerida.' });
         }
         const savedRoutine = await routineService.createRoutine(req.body, req.user.id);
         res.status(201).json(savedRoutine);
-    } catch(error){
-        next(error)
+    } catch (error) {
+        next(error);
     }
 });
 
@@ -186,7 +222,29 @@ routineRouter.post('/', async (req: AuthenticatedRequest, res: Response, next: N
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/RoutineInput'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               category:
+ *                 type: string
+ *                 enum: [trabajo, estudio, sueño, ejercicio, otro]
+ *               frequency:
+ *                 type: object
+ *                 properties:
+ *                   type:
+ *                     type: string
+ *                     enum: [diaria, semanal, mensual, dias_especificos]
+ *                   days:
+ *                     type: array
+ *                     items:
+ *                       type: number
+ *               estimatedDuration:
+ *                 type: number
+ *               suggestedTime:
+ *                 type: string
+ *               notifications:
+ *                 type: boolean
  *     responses:
  *       200:
  *         description: Rutina actualizada exitosamente.
@@ -203,14 +261,14 @@ routineRouter.post('/', async (req: AuthenticatedRequest, res: Response, next: N
  */
 routineRouter.put('/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-        if(!req.user) {
-            return res.status(401).json({ message: 'Autenticación requerida.' })
+        if (!req.user) {
+            return res.status(401).json({ message: 'Autenticación requerida.' });
         }
         const { id } = req.params;
         const updatedRoutine = await routineService.updateRoutine(id, req.body, req.user.id);
         res.json(updatedRoutine);
-    } catch(error){
-        next(error)
+    } catch (error) {
+        next(error);
     }
 });
 
@@ -239,14 +297,14 @@ routineRouter.put('/:id', async (req: AuthenticatedRequest, res: Response, next:
  */
 routineRouter.delete('/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-        if(!req.user) {
-            return res.status(401).json({ message: 'Autenticación requerida.' })
+        if (!req.user) {
+            return res.status(401).json({ message: 'Autenticación requerida.' });
         }
         const { id } = req.params;
         await routineService.deleteRoutine(id, req.user.id);
         res.status(204).send();
-    } catch(error) {
-        next(error)
+    } catch (error) {
+        next(error);
     }
 });
 
