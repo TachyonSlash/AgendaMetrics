@@ -4,7 +4,8 @@ import { Schema, model } from 'mongoose'
 interface IUser {
     username: string;
     email: string;
-    passwordHash: string; // Se guarda el hash de la contraseña
+    passwordHash?: string; // Se guarda el hash de la contraseña
+    googleId?: string;
     joinDate: Date;
 }
 
@@ -26,7 +27,13 @@ const userSchema = new Schema<IUser>({
     },
     passwordHash: {
         type: String,
-        required: [true, "La contraseña es obligatoria"]
+        required: false
+    },
+    googleId: {
+        type: String,
+        unique: true,
+        sparse: true, // Permite multiples documentos con valor nulo
+        required: false
     },
     joinDate: {
         type: Date,

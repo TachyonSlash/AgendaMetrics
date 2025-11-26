@@ -58,6 +58,38 @@ const swaggerOptions = {
             }
           }
         },
+        // --- ESQUEMAS AÑADIDOS PARA ARREGLAR EL ERROR ---
+        RegisterPayload: {
+          type: 'object',
+          required: ['username', 'email', 'password'],
+          properties: {
+            username: { type: 'string', example: 'nuevoUsuario' },
+            email: { type: 'string', format: 'email', example: 'nuevo@example.com' },
+            password: { type: 'string', format: 'password', description: 'Mínimo 6 caracteres', example: 'password123' }
+          }
+        },
+        LoginPayload: {
+          type: 'object',
+          required: ['email', 'password'],
+          properties: {
+            email: { type: 'string', format: 'email', example: 'juan.perez@example.com' },
+            password: { type: 'string', format: 'password', example: 'password123' }
+          }
+        },
+        LoginResponse: {
+          type: 'object',
+          properties: {
+            token: {
+              type: 'string',
+              description: 'Token JWT para usar en cabeceras de autorización.',
+              example: 'eyJhbGciOiJIUzI1Ni...'
+            },
+            user: {
+              $ref: '#/components/schemas/User'
+            }
+          }
+        },
+        // --- FIN DE LOS ESQUEMAS AÑADIDOS ---
         Routine: {
           type: 'object',
           properties: {
