@@ -58,7 +58,6 @@ const swaggerOptions = {
             }
           }
         },
-        // --- ESQUEMAS AÑADIDOS PARA ARREGLAR EL ERROR ---
         RegisterPayload: {
           type: 'object',
           required: ['username', 'email', 'password'],
@@ -76,6 +75,27 @@ const swaggerOptions = {
             password: { type: 'string', format: 'password', example: 'password123' }
           }
         },
+        UpdateUserPayload: {
+          type: 'object',
+          description: 'Campos para actualizar el perfil del usuario. Todos los campos son opcionales.',
+          properties: {
+            username: { 
+              type: 'string', 
+              example: 'JuanPerezActualizado' 
+            },
+            email: { 
+              type: 'string', 
+              format: 'email', 
+              example: 'juan.perez.nuevo@example.com' 
+            },
+            password: { 
+              type: 'string', 
+              format: 'password', 
+              description: 'Nueva contraseña. Mínimo 6 caracteres.', 
+              example: 'nuevaPassword456' 
+            }
+          }
+        },
         LoginResponse: {
           type: 'object',
           properties: {
@@ -89,7 +109,6 @@ const swaggerOptions = {
             }
           }
         },
-        // --- FIN DE LOS ESQUEMAS AÑADIDOS ---
         Routine: {
           type: 'object',
           properties: {

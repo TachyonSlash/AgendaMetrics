@@ -69,6 +69,47 @@ userRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) =
 /**
  * @swagger
  * /api/users/me:
+ *   put:
+ *     summary: Actualiza los datos del usuario autenticado (username, email, contraseña)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       description: Un objeto con los campos a actualizar. Todos son opcionales.
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateUserPayload'
+ *     responses:
+ *       200:
+ *         description: Usuario actualizado exitosamente.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Datos inválidos (ej. contraseña corta).
+ *       401:
+ *         description: No autorizado.
+ *       404:
+ *         description: Usuario no encontrado.
+ *       409:
+ *         description: El email ya está en uso por otro usuario.
+ */
+userRouter.put('/me', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+      const userId = req.user!.id;
+      const updatedUser = await userService.updateUser(userId, req.body);
+      res.json(updatedUser);
+  } catch (error) {
+      next(error);
+  }
+});
+
+/**
+ * @swagger
+ * /api/users/me:
  *   delete:
  *     summary: Elimina la cuenta del usuario autenticado y todas sus rutinas
  *     tags: [Users]
