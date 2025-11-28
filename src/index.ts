@@ -5,11 +5,17 @@ import mongoose from 'mongoose';
 import apiRouter from './routers/routes';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJSDoc from 'swagger-jsdoc';
+import cors from 'cors';
 
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
+
+// Define el puerto y la URL del servidor de forma dinámica
+const PORT = process.env.PORT || 3000;
+const SERVER_URL = process.env.SERVER_URL || `http://localhost:${PORT}`;
 
 const swaggerOptions = {
   definition: {
@@ -21,8 +27,8 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: 'http://localhost:3000',
-        description: 'Servidor de Desarrollo'
+        url: SERVER_URL,
+        description: 'Servidor Principal'
       },
     ],
     components: {
@@ -192,10 +198,6 @@ app.use('/api', apiRouter);
 
 app.use(errorHandler)
 
-const port = parseInt(process.env.PORT || '3000');
-app.listen(port, () => {
-  console.log(`listening on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`listening on port ${PORT}`);
 });
-
-
-
